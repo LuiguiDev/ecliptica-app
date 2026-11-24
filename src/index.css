@@ -1,0 +1,95 @@
+* { box-sizing: border-box; }
+
+html, body, #root {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #050510;
+  color: #e8e8f5;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.app { position: relative; width: 100%; height: 100%; }
+.app canvas { position: absolute; inset: 0; }
+
+.panel {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  width: 330px;
+  padding: 18px 20px;
+  background: rgba(10, 10, 30, 0.78);
+  border: 1px solid rgba(140, 140, 220, 0.25);
+  border-radius: 14px;
+  backdrop-filter: blur(6px);
+  z-index: 20;
+}
+
+.panel h1 {
+  margin: 0 0 6px;
+  font-size: 19px;
+  font-weight: 650;
+  color: #ffd97a;
+}
+
+.lede { margin: 0 0 12px; font-size: 13px; line-height: 1.45; color: #c3c3e0; }
+.lede b { color: #ff8ee6; }
+
+.current-sign {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 12px;
+  margin-bottom: 14px;
+  background: rgba(210, 59, 210, 0.12);
+  border: 1px solid rgba(210, 59, 210, 0.4);
+  border-radius: 10px;
+}
+.sign-name { font-size: 22px; font-weight: 700; color: #ff9df2; }
+.sign-range { font-size: 12px; color: #b9a9d8; }
+
+.control { margin-bottom: 12px; font-size: 13px; }
+.control label { display: block; margin-bottom: 4px; color: #cfcfe8; }
+.control.row { display: flex; align-items: center; gap: 12px; }
+.control.row label { flex: 1; margin: 0; }
+.check { display: flex !important; align-items: center; gap: 8px; cursor: pointer; }
+
+input[type='range'] { width: 100%; accent-color: #d23bd2; }
+
+button {
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: #d23bd2;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+button:hover { background: #e75ce7; }
+
+.hint { margin: 8px 0 0; font-size: 11px; color: #7d7da8; }
+
+.zodiac-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #a9a9e0;
+  text-shadow: 0 0 6px #000;
+  white-space: nowrap;
+  transition: color 0.2s;
+  user-select: none;
+}
+.zodiac-label.active {
+  color: #ff8ef2;
+  font-size: 19px;
+  text-shadow: 0 0 10px rgba(255, 92, 240, 0.7);
+}
+
+.ecliptic-label {
+  font-size: 15px;
+  font-weight: 600;
+  font-style: italic;
+  color: #d84bd8;
+  text-shadow: 0 0 6px #000;
+  user-select: none;
+}
