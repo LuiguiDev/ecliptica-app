@@ -119,6 +119,7 @@ const MAG_BUCKETS = [
 
 const STAR_LABEL_H = 0.3;     // alto de la leyenda en unidades locales de la figura
 const STAR_LABEL_MIN_PX = 20; // alto mínimo en pantalla para que se lea de lejos
+const STAR_LABEL_MAX_H = 1.35; // tope para que, al alejar la cámara, no se encimen
 const _labelPos = new THREE.Vector3();
 const _labelScale = new THREE.Vector3();
 
@@ -133,7 +134,7 @@ function FeaturedStar({ star, position, active }) {
     const parentScale = sp.parent.getWorldScale(_labelScale).y;
     const viewH = 2 * Math.tan((camera.fov * DEG) / 2) * _labelPos.distanceTo(camera.position);
     const minH = (STAR_LABEL_MIN_PX / size.height) * viewH / parentScale;
-    const h = Math.max(STAR_LABEL_H, minH);
+    const h = THREE.MathUtils.clamp(minH, STAR_LABEL_H, STAR_LABEL_MAX_H);
     sp.scale.set(h * label.aspect, h, 1);
   });
   const s = active ? 0.62 : 0.5;
