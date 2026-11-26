@@ -1,6 +1,6 @@
 import { useMemo, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Html, Billboard } from '@react-three/drei';
+import { OrbitControls, Billboard } from '@react-three/drei';
 import * as THREE from 'three';
 import { ZODIAC, sunLongitude, signIndexForLongitude } from './constellations.js';
 import { makeEarthTexture, makeGlowTexture, makeStarGlowTexture, makeDotTexture, makeTextSprite } from './textures.js';
@@ -117,17 +117,25 @@ const MAG_BUCKETS = [
   { max: Infinity, size: 1.2 },
 ];
 
+const STAR_LABEL_H = 0.3; // alto de la leyenda en unidades locales de la figura
+
 function FeaturedStar({ star, position, active }) {
   const glow = useMemo(() => makeStarGlowTexture(star.color), [star.color]);
+  const label = useMemo(() => makeTextSprite(star.name, { color: star.color, italic: false }), [star]);
   const s = active ? 0.62 : 0.5;
+  const left = star.label === 'left';
   return (
     <group position={position}>
       <sprite scale={[s, s, 1]}>
         <spriteMaterial map={glow} transparent blending={THREE.AdditiveBlending} depthWrite={false} />
       </sprite>
-      <Html zIndexRange={[12, 0]} distanceFactor={180} occlude={false}>
-        <div className={`star-label ${star.label ?? 'right'}`} style={{ color: star.color }}>{star.name}</div>
-      </Html>
+      <sprite
+        position={[left ? -0.14 : 0.14, 0, 0.02]}
+        center={[left ? 1 : 0, 0.5]}
+        scale={[STAR_LABEL_H * label.aspect, STAR_LABEL_H, 1]}
+      >
+        <spriteMaterial map={label.tex} transparent depthWrite={false} />
+      </sprite>
     </group>
   );
 }
@@ -158,13 +166,26 @@ function ConstellationFigure({ c, index, active, showLabels }) {
   }, [c]);
 
   const dot = useMemo(() => makeDotTexture(), []);
+  const top = useMemo(() => Math.max(...c.stars.map(([, sy]) => sy)), [c]);
+  const titles = useMemo(
+    () => ({
+      idle: makeTextSprite(c.name, { color: '#a9a9e0', italic: false }),
+      active: makeTextSprite(c.name, { color: '#ff8ef2', italic: false }),
+    }),
+    [c.name]
+  );
   const group = useRef();
+  const title = useRef();
   useFrame(() => {
     if (!group.current) return;
     const target = active ? FIG_SCALE * 1.4 : FIG_SCALE;
     const s = THREE.MathUtils.lerp(group.current.scale.x, target, 0.12);
     group.current.scale.setScalar(s);
+    if (title.current) title.current.position.y = top * s + 2.2;
   });
+
+  const titleTex = active ? titles.active : titles.idle;
+  const titleH = active ? 4.8 : 3.8;
 
   const lineColor = active ? '#ff5cf0' : '#7f7fd4';
   const starColor = active ? '#ffffff' : '#c9c9ff';
@@ -193,12 +214,14 @@ function ConstellationFigure({ c, index, active, showLabels }) {
             <FeaturedStar key={f.star} star={f} position={[...c.stars[f.index], 0.01]} active={active} />
           ))}
         </group>
+        <group ref={title} position={[0, top * FIG_SCALE + 2.2, 0]}>
+          {showLabels && (
+            <sprite center={[0.5, 0]} scale={[titleH * titleTex.aspect, titleH, 1]}>
+              <spriteMaterial map={titleTex.tex} transparent depthWrite={false} />
+            </sprite>
+          )}
+        </group>
       </Billboard>
-      {showLabels && (
-        <Html position={[x, 13, z]} center distanceFactor={180} occlude={false} zIndexRange={[10, 0]}>
-          <div className={`zodiac-label${active ? ' active' : ''}`}>{c.name}</div>
-        </Html>
-      )}
     </>
   );
 }

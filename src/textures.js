@@ -29,14 +29,15 @@ export function makeEarthTexture() {
 }
 
 // Sprite de texto (etiquetas 3D)
-export function makeTextSprite(text, { color = '#d84bd8', fontSize = 44 } = {}) {
+export function makeTextSprite(text, { color = '#d84bd8', fontSize = 44, italic = true } = {}) {
   const c = document.createElement('canvas');
   const ctx0 = c.getContext('2d');
-  ctx0.font = `italic 600 ${fontSize}px 'Segoe UI', sans-serif`;
+  const font = `${italic ? 'italic ' : ''}600 ${fontSize}px 'Segoe UI', sans-serif`;
+  ctx0.font = font;
   const w = Math.ceil(ctx0.measureText(text).width) + 20;
   c.width = w; c.height = fontSize + 24;
   const ctx = c.getContext('2d');
-  ctx.font = `italic 600 ${fontSize}px 'Segoe UI', sans-serif`;
+  ctx.font = font;
   ctx.fillStyle = color;
   ctx.shadowColor = '#000';
   ctx.shadowBlur = 8;
