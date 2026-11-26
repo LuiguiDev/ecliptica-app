@@ -93,3 +93,14 @@ button:hover { background: #e75ce7; }
   text-shadow: 0 0 6px #000;
   user-select: none;
 }
+
+.star-label {
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-shadow: 0 0 5px #000, 0 0 2px #000;
+  transform: translate(8px, -50%);
+  user-select: none;
+  pointer-events: none;
+}
+.star-label.left { transform: translate(calc(-100% - 8px), -50%); }

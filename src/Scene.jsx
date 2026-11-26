@@ -3,7 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Html, Billboard } from '@react-three/drei';
 import * as THREE from 'three';
 import { ZODIAC, sunLongitude, signIndexForLongitude } from './constellations.js';
-import { makeEarthTexture, makeGlowTexture, makeTextSprite } from './textures.js';
+import { makeEarthTexture, makeGlowTexture, makeStarGlowTexture, makeDotTexture, makeTextSprite } from './textures.js';
 
 const RING = 110;      // radio del cinturón zodiacal
 const ORBIT = 30;      // radio de la órbita terrestre
@@ -110,26 +110,54 @@ function SightArrow({ day }) {
   );
 }
 
+// Tamaño aparente según magnitud: estrellas brillantes, medias y tenues
+const MAG_BUCKETS = [
+  { max: 2.5, size: 2.6 },
+  { max: 3.8, size: 1.8 },
+  { max: Infinity, size: 1.2 },
+];
+
+function FeaturedStar({ star, position, active }) {
+  const glow = useMemo(() => makeStarGlowTexture(star.color), [star.color]);
+  const s = active ? 0.62 : 0.5;
+  return (
+    <group position={position}>
+      <sprite scale={[s, s, 1]}>
+        <spriteMaterial map={glow} transparent blending={THREE.AdditiveBlending} depthWrite={false} />
+      </sprite>
+      <Html zIndexRange={[12, 0]} distanceFactor={180} occlude={false}>
+        <div className={`star-label ${star.label ?? 'right'}`} style={{ color: star.color }}>{star.name}</div>
+      </Html>
+    </group>
+  );
+}
+
 function ConstellationFigure({ c, index, active, showLabels }) {
   const angle = (index * 30 + 15) * DEG;
   const x = Math.cos(angle) * RING;
   const z = Math.sin(angle) * RING;
 
-  const { lineGeo, pointGeo } = useMemo(() => {
+  const { lineGeo, pointGeos } = useMemo(() => {
     const linePts = [];
     for (const [a, b] of c.lines) {
       linePts.push(...c.stars[a], 0, ...c.stars[b], 0);
     }
     const lg = new THREE.BufferGeometry();
     lg.setAttribute('position', new THREE.Float32BufferAttribute(linePts, 3));
-    const pg = new THREE.BufferGeometry();
-    pg.setAttribute(
-      'position',
-      new THREE.Float32BufferAttribute(c.stars.flatMap(([x, y]) => [x, y, 0]), 3)
-    );
-    return { lineGeo: lg, pointGeo: pg };
+    const featured = new Set(c.featured.map(f => f.index));
+    const pgs = MAG_BUCKETS.map(({ max, size }, b) => {
+      const min = b === 0 ? -Infinity : MAG_BUCKETS[b - 1].max;
+      const pos = c.stars.flatMap(([sx, sy], i) =>
+        !featured.has(i) && c.mags[i] > min && c.mags[i] <= max ? [sx, sy, 0] : []
+      );
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+      return { geo: g, size };
+    });
+    return { lineGeo: lg, pointGeos: pgs };
   }, [c]);
 
+  const dot = useMemo(() => makeDotTexture(), []);
   const group = useRef();
   useFrame(() => {
     if (!group.current) return;
@@ -148,9 +176,22 @@ function ConstellationFigure({ c, index, active, showLabels }) {
           <lineSegments geometry={lineGeo}>
             <lineBasicMaterial color={lineColor} transparent opacity={active ? 1 : 0.65} />
           </lineSegments>
-          <points geometry={pointGeo}>
-            <pointsMaterial color={starColor} size={active ? 0.2 : 0.14} sizeAttenuation={false} />
-          </points>
+          {pointGeos.map(({ geo, size }) => (
+            <points key={size} geometry={geo}>
+              <pointsMaterial
+                color={starColor}
+                size={active ? size * 1.25 : size}
+                map={dot}
+                transparent
+                alphaTest={0.1}
+                depthWrite={false}
+                sizeAttenuation
+              />
+            </points>
+          ))}
+          {c.featured.map(f => (
+            <FeaturedStar key={f.star} star={f} position={[...c.stars[f.index], 0.01]} active={active} />
+          ))}
         </group>
       </Billboard>
       {showLabels && (

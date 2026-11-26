@@ -63,3 +63,36 @@ export function makeGlowTexture(inner = 'rgba(255,230,150,1)', outer = 'rgba(255
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }
+
+// Resplandor de una estrella destacada en el color dado (hex)
+export function makeStarGlowTexture(color) {
+  const s = 128;
+  const c = document.createElement('canvas');
+  c.width = s; c.height = s;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+  g.addColorStop(0, '#ffffff');
+  g.addColorStop(0.12, color);
+  g.addColorStop(0.35, `${color}66`);
+  g.addColorStop(1, `${color}00`);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, s, s);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+// Disco suave para dibujar estrellas redondas con THREE.Points
+export function makeDotTexture() {
+  const s = 64;
+  const c = document.createElement('canvas');
+  c.width = s; c.height = s;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+  g.addColorStop(0, 'rgba(255,255,255,1)');
+  g.addColorStop(0.55, 'rgba(255,255,255,1)');
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, s, s);
+  return new THREE.CanvasTexture(c);
+}
