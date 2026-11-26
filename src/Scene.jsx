@@ -117,11 +117,25 @@ const MAG_BUCKETS = [
   { max: Infinity, size: 1.2 },
 ];
 
-const STAR_LABEL_H = 0.3; // alto de la leyenda en unidades locales de la figura
+const STAR_LABEL_H = 0.3;     // alto de la leyenda en unidades locales de la figura
+const STAR_LABEL_MIN_PX = 20; // alto mínimo en pantalla para que se lea de lejos
+const _labelPos = new THREE.Vector3();
+const _labelScale = new THREE.Vector3();
 
 function FeaturedStar({ star, position, active }) {
   const glow = useMemo(() => makeStarGlowTexture(star.color), [star.color]);
   const label = useMemo(() => makeTextSprite(star.name, { color: star.color, italic: false }), [star]);
+  const labelRef = useRef();
+  useFrame(({ camera, size }) => {
+    const sp = labelRef.current;
+    if (!sp?.parent) return;
+    sp.getWorldPosition(_labelPos);
+    const parentScale = sp.parent.getWorldScale(_labelScale).y;
+    const viewH = 2 * Math.tan((camera.fov * DEG) / 2) * _labelPos.distanceTo(camera.position);
+    const minH = (STAR_LABEL_MIN_PX / size.height) * viewH / parentScale;
+    const h = Math.max(STAR_LABEL_H, minH);
+    sp.scale.set(h * label.aspect, h, 1);
+  });
   const s = active ? 0.62 : 0.5;
   const left = star.label === 'left';
   return (
@@ -130,6 +144,7 @@ function FeaturedStar({ star, position, active }) {
         <spriteMaterial map={glow} transparent blending={THREE.AdditiveBlending} depthWrite={false} />
       </sprite>
       <sprite
+        ref={labelRef}
         position={[left ? -0.14 : 0.14, 0, 0.02]}
         center={[left ? 1 : 0, 0.5]}
         scale={[STAR_LABEL_H * label.aspect, STAR_LABEL_H, 1]}
