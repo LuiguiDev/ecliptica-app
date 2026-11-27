@@ -16,10 +16,6 @@ export default function App() {
 
       <div className="panel">
         <h1>El movimiento aparente del Sol</h1>
-        <p className="lede">
-          La flecha muestra la línea de visión <b>Tierra → Sol → constelación</b>:
-          el signo del zodiaco frente al que “se ve” el Sol desde la Tierra en esa fecha.
-        </p>
 
         <div className="current-sign">
           <span className="sign-name">{sign.name}</span>

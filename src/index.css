@@ -32,9 +32,6 @@ html, body, #root {
   color: #ffd97a;
 }
 
-.lede { margin: 0 0 12px; font-size: 13px; line-height: 1.45; color: #c3c3e0; }
-.lede b { color: #ff8ee6; }
-
 .current-sign {
   display: flex;
   align-items: baseline;
@@ -77,5 +74,50 @@ button:hover { background: #e75ce7; }
   color: #d84bd8;
   text-shadow: 0 0 6px #000;
   user-select: none;
+}
+
+/* Vista móvil: panel inferior a todo lo ancho, minimalista liquid-glass */
+@media (max-width: 640px) {
+  .panel {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02)),
+      rgba(30, 30, 55, 0.32);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-bottom: none;
+    border-radius: 24px 24px 0 0;
+    backdrop-filter: blur(24px) saturate(170%);
+    -webkit-backdrop-filter: blur(24px) saturate(170%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      0 -10px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  .panel h1 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    opacity: 0.85;
+  }
+
+  .current-sign {
+    padding: 6px 12px;
+    margin-bottom: 10px;
+    background: rgba(210, 59, 210, 0.1);
+    border-color: rgba(255, 255, 255, 0.16);
+  }
+  .sign-name { font-size: 19px; }
+
+  .control { margin-bottom: 8px; font-size: 12px; }
+  .control:last-of-type { margin-bottom: 0; }
+
+  button { padding: 6px 12px; font-size: 12px; }
+
+  .hint { display: none; }
 }
 
