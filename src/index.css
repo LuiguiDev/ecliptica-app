@@ -25,12 +25,36 @@ html, body, #root {
   z-index: 20;
 }
 
+.panel-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
 .panel h1 {
-  margin: 0 0 6px;
+  margin: 0;
   font-size: 19px;
   font-weight: 650;
   color: #ffd97a;
 }
+
+.panel-actions { display: flex; gap: 10px; }
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  color: #e8e8f5;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.icon-btn:hover { background: rgba(255, 255, 255, 0.16); }
 
 .current-sign {
   display: flex;
@@ -51,6 +75,15 @@ html, body, #root {
 .control.row label { flex: 1; margin: 0; }
 .check { display: flex !important; align-items: center; gap: 8px; cursor: pointer; }
 
+.date-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  color: #cfcfe8;
+}
+.date-row b { color: #fff; font-size: 15px; }
+
 input[type='range'] { width: 100%; accent-color: #d23bd2; }
 
 button {
@@ -65,7 +98,35 @@ button {
 }
 button:hover { background: #e75ce7; }
 
+/* botones redondos arriba del botón genérico */
+.panel-actions .icon-btn { background: rgba(255, 255, 255, 0.07); color: #e8e8f5; }
+.panel-actions .icon-btn:hover { background: rgba(255, 255, 255, 0.16); }
+
 .hint { margin: 8px 0 0; font-size: 11px; color: #7d7da8; }
+
+/* regla del año: contenedor de las marcas; el deslizador se superpone transparente */
+.date-slider { margin: 2px 0 0; }
+.ruler { display: none; }
+.months {
+  display: none;
+  font-size: 10px;
+  color: #b9b9d4;
+  letter-spacing: 0.02em;
+  margin-top: 3px;
+}
+/* ancho proporcional a los días de cada mes, para alinear la etiqueta con el calendario */
+.months span:nth-child(1)  { flex: 31; }
+.months span:nth-child(2)  { flex: 28; }
+.months span:nth-child(3)  { flex: 31; }
+.months span:nth-child(4)  { flex: 30; }
+.months span:nth-child(5)  { flex: 31; }
+.months span:nth-child(6)  { flex: 30; }
+.months span:nth-child(7)  { flex: 31; }
+.months span:nth-child(8)  { flex: 31; }
+.months span:nth-child(9)  { flex: 30; }
+.months span:nth-child(10) { flex: 31; }
+.months span:nth-child(11) { flex: 30; }
+.months span:nth-child(12) { flex: 31; }
 
 .ecliptic-label {
   font-size: 15px;
@@ -84,7 +145,7 @@ button:hover { background: #e75ce7; }
     right: 0;
     bottom: 0;
     width: 100%;
-    padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+    padding: 16px 22px calc(16px + env(safe-area-inset-bottom, 0px));
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02)),
       rgba(30, 30, 55, 0.32);
@@ -99,25 +160,103 @@ button:hover { background: #e75ce7; }
   }
 
   .panel h1 {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    opacity: 0.85;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.62);
+    line-height: 1.8;
+    flex-shrink: 0;
   }
+
+  .icon-btn { width: 46px; height: 46px; }
 
   .current-sign {
-    padding: 6px 12px;
-    margin-bottom: 10px;
-    background: rgba(210, 59, 210, 0.1);
-    border-color: rgba(255, 255, 255, 0.16);
+    padding: 0;
+    margin: 2px 0 14px;
+    background: none;
+    border: none;
+    display: block;
   }
-  .sign-name { font-size: 19px; }
+  .sign-name {
+    display: block;
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1.05;
+    background: linear-gradient(90deg, #ff8ae2, #d96bff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .sign-range { font-size: 13px; color: #cfcfe8; }
 
-  .control { margin-bottom: 8px; font-size: 12px; }
+  .date-row b { font-size: 17px; }
+
+  /* Regla como pista: el input es transparente y solo aporta el pulgar-linea */
+  .ruler-track { position: relative; height: 36px; }
+  .ruler {
+    position: absolute;
+    inset: 0 2px;
+    display: block;
+    width: calc(100% - 4px);
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .ruler-track input[type='range'] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 36px;
+    margin: 0;
+    padding: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    border: 0;
+  }
+  .ruler-track input[type='range']::-webkit-slider-runnable-track {
+    background: transparent;
+    border: 0;
+    height: 36px;
+  }
+  .ruler-track input[type='range']::-moz-range-track {
+    background: transparent;
+    border: 0;
+    height: 36px;
+  }
+  .ruler-track input[type='range']::-moz-range-progress { background: transparent; }
+  .ruler-track input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 4px;
+    height: 36px;
+    border: 1.5px solid #f089e2;
+    border-radius: 2px;
+    background: #ffd9f6;
+    box-shadow: 0 0 14px 2px rgba(240, 137, 226, 0.85);
+    cursor: pointer;
+  }
+  /* Firefox suma el borde por fuera del width: con width 1px + bordes queda de 4px,
+     igual que en WebKit, y el recorrido del pulgar coincide con las marcas */
+  .ruler-track input[type='range']::-moz-range-thumb {
+    width: 1px;
+    height: 36px;
+    border: 1.5px solid #f089e2;
+    border-radius: 2px;
+    background: #ffd9f6;
+    box-shadow: 0 0 14px 2px rgba(240, 137, 226, 0.85);
+    cursor: pointer;
+  }
+
+  .months { display: flex; }
+
+  .control.row.speed-row { display: none; }
+
+  .control { margin-bottom: 15px; font-size: 12px; }
   .control:last-of-type { margin-bottom: 0; }
-
-  button { padding: 6px 12px; font-size: 12px; }
+  .date-slider { margin-bottom: 15px; }
+  .current-sign { margin-bottom: 18px; }
 
   .hint { display: none; }
 }
-
