@@ -1,9 +1,9 @@
 import { useMemo, useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Html, Billboard } from '@react-three/drei';
+import { OrbitControls, Billboard } from '@react-three/drei';
 import * as THREE from 'three';
 import { ZODIAC, sunLongitude, signIndexForLongitude } from './constellations.js';
-import { makeEarthTexture, makeGlowTexture, makeTextSprite } from './textures.js';
+import { makeEarthTexture, makeGlowTexture, makeStarGlowTexture, makeDotTexture, makeTextSprite } from './textures.js';
 
 const RING = 110;      // radio del cinturón zodiacal
 const ORBIT = 30;      // radio de la órbita terrestre
@@ -110,33 +110,98 @@ function SightArrow({ day }) {
   );
 }
 
+// Tamaño aparente según magnitud: estrellas brillantes, medias y tenues
+const MAG_BUCKETS = [
+  { max: 2.5, size: 2.6 },
+  { max: 3.8, size: 1.8 },
+  { max: Infinity, size: 1.2 },
+];
+
+const STAR_LABEL_H = 0.3;     // alto de la leyenda en unidades locales de la figura
+const STAR_LABEL_MIN_PX = 20; // alto mínimo en pantalla para que se lea de lejos
+const STAR_LABEL_MAX_H = 1.35; // tope para que, al alejar la cámara, no se encimen
+const _labelPos = new THREE.Vector3();
+const _labelScale = new THREE.Vector3();
+
+function FeaturedStar({ star, position, active }) {
+  const glow = useMemo(() => makeStarGlowTexture(star.color), [star.color]);
+  const label = useMemo(() => makeTextSprite(star.name, { color: star.color, italic: false }), [star]);
+  const labelRef = useRef();
+  useFrame(({ camera, size }) => {
+    const sp = labelRef.current;
+    if (!sp?.parent) return;
+    sp.getWorldPosition(_labelPos);
+    const parentScale = sp.parent.getWorldScale(_labelScale).y;
+    const viewH = 2 * Math.tan((camera.fov * DEG) / 2) * _labelPos.distanceTo(camera.position);
+    const minH = (STAR_LABEL_MIN_PX / size.height) * viewH / parentScale;
+    const h = THREE.MathUtils.clamp(minH, STAR_LABEL_H, STAR_LABEL_MAX_H);
+    sp.scale.set(h * label.aspect, h, 1);
+  });
+  const s = active ? 0.62 : 0.5;
+  const left = star.label === 'left';
+  return (
+    <group position={position}>
+      <sprite scale={[s, s, 1]}>
+        <spriteMaterial map={glow} transparent blending={THREE.AdditiveBlending} depthWrite={false} />
+      </sprite>
+      <sprite
+        ref={labelRef}
+        position={[left ? -0.14 : 0.14, 0, 0.02]}
+        center={[left ? 1 : 0, 0.5]}
+        scale={[STAR_LABEL_H * label.aspect, STAR_LABEL_H, 1]}
+      >
+        <spriteMaterial map={label.tex} transparent depthWrite={false} />
+      </sprite>
+    </group>
+  );
+}
+
 function ConstellationFigure({ c, index, active, showLabels }) {
   const angle = (index * 30 + 15) * DEG;
   const x = Math.cos(angle) * RING;
   const z = Math.sin(angle) * RING;
 
-  const { lineGeo, pointGeo } = useMemo(() => {
+  const { lineGeo, pointGeos } = useMemo(() => {
     const linePts = [];
     for (const [a, b] of c.lines) {
       linePts.push(...c.stars[a], 0, ...c.stars[b], 0);
     }
     const lg = new THREE.BufferGeometry();
     lg.setAttribute('position', new THREE.Float32BufferAttribute(linePts, 3));
-    const pg = new THREE.BufferGeometry();
-    pg.setAttribute(
-      'position',
-      new THREE.Float32BufferAttribute(c.stars.flatMap(([x, y]) => [x, y, 0]), 3)
-    );
-    return { lineGeo: lg, pointGeo: pg };
+    const featured = new Set(c.featured.map(f => f.index));
+    const pgs = MAG_BUCKETS.map(({ max, size }, b) => {
+      const min = b === 0 ? -Infinity : MAG_BUCKETS[b - 1].max;
+      const pos = c.stars.flatMap(([sx, sy], i) =>
+        !featured.has(i) && c.mags[i] > min && c.mags[i] <= max ? [sx, sy, 0] : []
+      );
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+      return { geo: g, size };
+    });
+    return { lineGeo: lg, pointGeos: pgs };
   }, [c]);
 
+  const dot = useMemo(() => makeDotTexture(), []);
+  const top = useMemo(() => Math.max(...c.stars.map(([, sy]) => sy)), [c]);
+  const titles = useMemo(
+    () => ({
+      idle: makeTextSprite(c.name, { color: '#a9a9e0', italic: false }),
+      active: makeTextSprite(c.name, { color: '#ff8ef2', italic: false }),
+    }),
+    [c.name]
+  );
   const group = useRef();
+  const title = useRef();
   useFrame(() => {
     if (!group.current) return;
     const target = active ? FIG_SCALE * 1.4 : FIG_SCALE;
     const s = THREE.MathUtils.lerp(group.current.scale.x, target, 0.12);
     group.current.scale.setScalar(s);
+    if (title.current) title.current.position.y = top * s + 2.2;
   });
+
+  const titleTex = active ? titles.active : titles.idle;
+  const titleH = active ? 4.8 : 3.8;
 
   const lineColor = active ? '#ff5cf0' : '#7f7fd4';
   const starColor = active ? '#ffffff' : '#c9c9ff';
@@ -148,16 +213,31 @@ function ConstellationFigure({ c, index, active, showLabels }) {
           <lineSegments geometry={lineGeo}>
             <lineBasicMaterial color={lineColor} transparent opacity={active ? 1 : 0.65} />
           </lineSegments>
-          <points geometry={pointGeo}>
-            <pointsMaterial color={starColor} size={active ? 0.2 : 0.14} sizeAttenuation={false} />
-          </points>
+          {pointGeos.map(({ geo, size }) => (
+            <points key={size} geometry={geo}>
+              <pointsMaterial
+                color={starColor}
+                size={active ? size * 1.25 : size}
+                map={dot}
+                transparent
+                alphaTest={0.1}
+                depthWrite={false}
+                sizeAttenuation
+              />
+            </points>
+          ))}
+          {c.featured.map(f => (
+            <FeaturedStar key={f.star} star={f} position={[...c.stars[f.index], 0.01]} active={active} />
+          ))}
+        </group>
+        <group ref={title} position={[0, top * FIG_SCALE + 2.2, 0]}>
+          {showLabels && (
+            <sprite center={[0.5, 0]} scale={[titleH * titleTex.aspect, titleH, 1]}>
+              <spriteMaterial map={titleTex.tex} transparent depthWrite={false} />
+            </sprite>
+          )}
         </group>
       </Billboard>
-      {showLabels && (
-        <Html position={[x, 13, z]} center distanceFactor={180} occlude={false} zIndexRange={[10, 0]}>
-          <div className={`zodiac-label${active ? ' active' : ''}`}>{c.name}</div>
-        </Html>
-      )}
     </>
   );
 }
