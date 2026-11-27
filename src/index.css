@@ -198,6 +198,8 @@ button:hover { background: #e75ce7; }
     position: absolute;
     inset: 0 2px;
     display: block;
+    width: calc(100% - 4px);
+    height: 100%;
     pointer-events: none;
   }
 
