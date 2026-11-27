@@ -48,7 +48,7 @@ export default function App() {
               className="icon-btn"
               aria-label={showLabels ? 'Ocultar nombres de constelaciones' : 'Mostrar nombres de constelaciones'}
               title="Nombres de constelaciones"
-              aria-pressed={!showLabels}
+              aria-pressed={showLabels}
               onClick={() => setShowLabels(v => !v)}
             >
               <EyeIcon visible={showLabels} />
