@@ -104,17 +104,9 @@ button:hover { background: #e75ce7; }
 
 .hint { margin: 8px 0 0; font-size: 11px; color: #7d7da8; }
 
-/* regla del año: marcas cortas y largas bajo el deslizador */
-.date-slider { position: relative; }
-.ruler {
-  height: 14px;
-  margin-top: 2px;
-  background:
-    repeating-linear-gradient(90deg, rgba(255,255,255,0.55) 0 1px, transparent 1px 20px) 0 0 / 100% 6px no-repeat,
-    repeating-linear-gradient(90deg, rgba(255,255,255,0.7) 0 1.5px, transparent 1.5px calc(100% / 12)) 0 0 / 100% 14px no-repeat;
-  opacity: 0.65;
-  display: none;
-}
+/* regla del año: contenedor de las marcas; el deslizador se superpone transparente */
+.date-slider { margin: 2px 0 0; }
+.ruler { display: none; }
 .months {
   display: none;
   font-size: 10px;
@@ -168,13 +160,13 @@ button:hover { background: #e75ce7; }
   }
 
   .panel h1 {
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.18em;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.26em;
     text-transform: uppercase;
-    color: #e8e8f5;
-    opacity: 0.9;
-    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.62);
+    line-height: 1.8;
+    flex-shrink: 0;
   }
 
   .icon-btn { width: 46px; height: 46px; }
@@ -200,13 +192,60 @@ button:hover { background: #e75ce7; }
 
   .date-row b { font-size: 17px; }
 
-  .date-slider input[type='range'] {
-    accent-color: #3b82f6;
-    height: 22px;
-    margin: 0;
+  /* Regla como pista: el input es transparente y solo aporta el pulgar-linea */
+  .ruler-track { position: relative; height: 36px; }
+  .ruler {
+    position: absolute;
+    inset: 0 2px;
+    display: block;
+    pointer-events: none;
   }
-  .ruler, .months { display: flex; }
-  .ruler { display: block; }
+
+  .ruler-track input[type='range'] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 36px;
+    margin: 0;
+    padding: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    border: 0;
+  }
+  .ruler-track input[type='range']::-webkit-slider-runnable-track {
+    background: transparent;
+    border: 0;
+    height: 36px;
+  }
+  .ruler-track input[type='range']::-moz-range-track {
+    background: transparent;
+    border: 0;
+    height: 36px;
+  }
+  .ruler-track input[type='range']::-moz-range-progress { background: transparent; }
+  .ruler-track input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 4px;
+    height: 36px;
+    border: 0;
+    border-radius: 2px;
+    background: #f089e2;
+    box-shadow: 0 0 14px 2px rgba(240, 137, 226, 0.85);
+    cursor: pointer;
+  }
+  .ruler-track input[type='range']::-moz-range-thumb {
+    width: 4px;
+    height: 36px;
+    border: 0;
+    border-radius: 2px;
+    background: #f089e2;
+    box-shadow: 0 0 14px 2px rgba(240, 137, 226, 0.85);
+    cursor: pointer;
+  }
+
+  .months { display: flex; }
 
   .control.row.speed-row { display: none; }
 

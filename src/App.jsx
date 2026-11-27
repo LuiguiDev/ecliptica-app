@@ -26,6 +26,31 @@ function PlayIcon({ playing }) {
 }
 
 const MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const MONTH_DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+// Regla del año: marcas semanales y mensuales en unidades de día (viewBox 365).
+// Las de la izquierda del pulgar van en acento y la regla funciona como progreso.
+function YearRuler({ progress }) {
+  const bounds = [0];
+  for (const d of MONTH_DAYS) bounds.push(bounds[bounds.length - 1] + d);
+  const major = new Set(bounds.slice(1, 12));
+  const minor = [];
+  for (let x = 7; x < 365; x += 7) if (!major.has(x)) minor.push(x);
+  const accent = '#f089e2';
+  const tick = (x, h, color, opacity) => (
+    <line key={`${x}-${h}`} x1={x} x2={x} y1={36 - h} y2={36} stroke={color} strokeOpacity={opacity} strokeWidth={1} vector-effect="non-scaling-stroke" />
+  );
+  return (
+    <svg className="ruler" viewBox="0 0 365 36" preserveAspectRatio="none" width="100%" height="100%" aria-hidden="true">
+      {minor.map(x => tick(x, 8, '#ffffff', 0.28))}
+      {bounds.slice(1).map(x => tick(x, 18, '#ffffff', 0.65))}
+      <g>
+        {minor.filter(x => x <= progress).map(x => tick(x, 8, accent, 0.9))}
+        {bounds.slice(1).filter(x => x <= progress).map(x => tick(x, 18, accent, 0.9))}
+      </g>
+    </svg>
+  );
+}
 
 export default function App() {
   const [day, setDay] = useState(1); // 1 de enero
@@ -41,7 +66,7 @@ export default function App() {
 
       <div className="panel">
         <div className="panel-top">
-          <h1>El movimiento aparente del Sol</h1>
+          <h1>El movimiento<br />aparente del Sol</h1>
           <div className="panel-actions">
             <button
               type="button"
@@ -76,15 +101,18 @@ export default function App() {
             <b>{dayToDate(Math.floor(day))}</b>
           </div>
           <div className="date-slider">
-            <input
-              type="range"
-              min="1"
-              max="365"
-              step="1"
-              value={Math.floor(day)}
-              onChange={e => setDay(Number(e.target.value))}
-            />
-            <div className="ruler" aria-hidden="true" />
+            <div className="ruler-track">
+              <input
+                type="range"
+                min="1"
+                max="365"
+                step="1"
+                value={Math.floor(day)}
+                aria-label="Día del año"
+                onChange={e => setDay(Number(e.target.value))}
+              />
+              <YearRuler progress={Math.floor(day) - 1} />
+            </div>
             <div className="months" aria-hidden="true">
               {MONTHS.map(m => <span key={m}>{m}</span>)}
             </div>
