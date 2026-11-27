@@ -117,14 +117,24 @@ button:hover { background: #e75ce7; }
 }
 .months {
   display: none;
-  justify-content: space-between;
   font-size: 10px;
   color: #b9b9d4;
   letter-spacing: 0.02em;
   margin-top: 3px;
 }
-.months span { flex: 1; text-align: left; }
-.months span:last-child { flex: 0; }
+/* ancho proporcional a los días de cada mes, para alinear la etiqueta con el calendario */
+.months span:nth-child(1)  { flex: 31; }
+.months span:nth-child(2)  { flex: 28; }
+.months span:nth-child(3)  { flex: 31; }
+.months span:nth-child(4)  { flex: 30; }
+.months span:nth-child(5)  { flex: 31; }
+.months span:nth-child(6)  { flex: 30; }
+.months span:nth-child(7)  { flex: 31; }
+.months span:nth-child(8)  { flex: 31; }
+.months span:nth-child(9)  { flex: 30; }
+.months span:nth-child(10) { flex: 31; }
+.months span:nth-child(11) { flex: 30; }
+.months span:nth-child(12) { flex: 31; }
 
 .ecliptic-label {
   font-size: 15px;
