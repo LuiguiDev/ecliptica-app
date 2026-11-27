@@ -37,11 +37,15 @@ function YearRuler({ progress }) {
   const minor = [];
   for (let x = 7; x < 365; x += 7) if (!major.has(x)) minor.push(x);
   const accent = '#f089e2';
+  // El pulgar (4 px) recorre 4 px menos que el ancho del input: su centro va de 2 a W-2.
+  // Compensamos desplazando cada marca 2·(1 − d/365) unidades para que tocar la marca
+  // de un día seleccione ese día en cualquier ancho de pantalla.
+  const pos = x => x + 2 * (1 - x / 365);
   const tick = (x, h, color, opacity) => (
-    <line key={`${x}-${h}`} x1={x} x2={x} y1={36 - h} y2={36} stroke={color} strokeOpacity={opacity} strokeWidth={1} vector-effect="non-scaling-stroke" />
+    <line key={`${x}-${h}`} x1={pos(x)} x2={pos(x)} y1={36 - h} y2={36} stroke={color} strokeOpacity={opacity} strokeWidth={1} vector-effect="non-scaling-stroke" />
   );
   return (
-    <svg className="ruler" viewBox="0 0 365 36" preserveAspectRatio="none" width="100%" height="100%" aria-hidden="true">
+    <svg className="ruler" viewBox="0 0 367 36" preserveAspectRatio="none" aria-hidden="true">
       {minor.map(x => tick(x, 8, '#ffffff', 0.28))}
       {bounds.slice(1).map(x => tick(x, 18, '#ffffff', 0.65))}
       <g>
