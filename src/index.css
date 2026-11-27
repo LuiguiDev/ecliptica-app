@@ -231,18 +231,18 @@ button:hover { background: #e75ce7; }
     appearance: none;
     width: 4px;
     height: 36px;
-    border: 0;
+    border: 1.5px solid #f089e2;
     border-radius: 2px;
-    background: #f089e2;
+    background: #ffd9f6;
     box-shadow: 0 0 14px 2px rgba(240, 137, 226, 0.85);
     cursor: pointer;
   }
   .ruler-track input[type='range']::-moz-range-thumb {
     width: 4px;
     height: 36px;
-    border: 0;
+    border: 1.5px solid #f089e2;
     border-radius: 2px;
-    background: #f089e2;
+    background: #ffd9f6;
     box-shadow: 0 0 14px 2px rgba(240, 137, 226, 0.85);
     cursor: pointer;
   }
@@ -251,8 +251,10 @@ button:hover { background: #e75ce7; }
 
   .control.row.speed-row { display: none; }
 
-  .control { margin-bottom: 10px; font-size: 12px; }
+  .control { margin-bottom: 15px; font-size: 12px; }
   .control:last-of-type { margin-bottom: 0; }
+  .date-slider { margin-bottom: 15px; }
+  .current-sign { margin-bottom: 18px; }
 
   .hint { display: none; }
 }
