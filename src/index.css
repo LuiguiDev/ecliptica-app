@@ -25,12 +25,36 @@ html, body, #root {
   z-index: 20;
 }
 
+.panel-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
 .panel h1 {
-  margin: 0 0 6px;
+  margin: 0;
   font-size: 19px;
   font-weight: 650;
   color: #ffd97a;
 }
+
+.panel-actions { display: flex; gap: 10px; }
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  color: #e8e8f5;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  cursor: pointer;
+}
+.icon-btn:hover { background: rgba(255, 255, 255, 0.16); }
 
 .current-sign {
   display: flex;
@@ -51,6 +75,15 @@ html, body, #root {
 .control.row label { flex: 1; margin: 0; }
 .check { display: flex !important; align-items: center; gap: 8px; cursor: pointer; }
 
+.date-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  color: #cfcfe8;
+}
+.date-row b { color: #fff; font-size: 15px; }
+
 input[type='range'] { width: 100%; accent-color: #d23bd2; }
 
 button {
@@ -65,7 +98,33 @@ button {
 }
 button:hover { background: #e75ce7; }
 
+/* botones redondos arriba del botón genérico */
+.panel-actions .icon-btn { background: rgba(255, 255, 255, 0.07); color: #e8e8f5; }
+.panel-actions .icon-btn:hover { background: rgba(255, 255, 255, 0.16); }
+
 .hint { margin: 8px 0 0; font-size: 11px; color: #7d7da8; }
+
+/* regla del año: marcas cortas y largas bajo el deslizador */
+.date-slider { position: relative; }
+.ruler {
+  height: 14px;
+  margin-top: 2px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.55) 0 1px, transparent 1px 20px) 0 0 / 100% 6px no-repeat,
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.7) 0 1.5px, transparent 1.5px calc(100% / 12)) 0 0 / 100% 14px no-repeat;
+  opacity: 0.65;
+  display: none;
+}
+.months {
+  display: none;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #b9b9d4;
+  letter-spacing: 0.02em;
+  margin-top: 3px;
+}
+.months span { flex: 1; text-align: left; }
+.months span:last-child { flex: 0; }
 
 .ecliptic-label {
   font-size: 15px;
@@ -84,7 +143,7 @@ button:hover { background: #e75ce7; }
     right: 0;
     bottom: 0;
     width: 100%;
-    padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+    padding: 16px 22px calc(16px + env(safe-area-inset-bottom, 0px));
     background:
       linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02)),
       rgba(30, 30, 55, 0.32);
@@ -99,25 +158,50 @@ button:hover { background: #e75ce7; }
   }
 
   .panel h1 {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    opacity: 0.85;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #e8e8f5;
+    opacity: 0.9;
+    line-height: 1.5;
   }
+
+  .icon-btn { width: 46px; height: 46px; }
 
   .current-sign {
-    padding: 6px 12px;
-    margin-bottom: 10px;
-    background: rgba(210, 59, 210, 0.1);
-    border-color: rgba(255, 255, 255, 0.16);
+    padding: 0;
+    margin: 2px 0 14px;
+    background: none;
+    border: none;
+    display: block;
   }
-  .sign-name { font-size: 19px; }
+  .sign-name {
+    display: block;
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1.05;
+    background: linear-gradient(90deg, #ff8ae2, #d96bff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .sign-range { font-size: 13px; color: #cfcfe8; }
 
-  .control { margin-bottom: 8px; font-size: 12px; }
+  .date-row b { font-size: 17px; }
+
+  .date-slider input[type='range'] {
+    accent-color: #3b82f6;
+    height: 22px;
+    margin: 0;
+  }
+  .ruler, .months { display: flex; }
+  .ruler { display: block; }
+
+  .control.row.speed-row { display: none; }
+
+  .control { margin-bottom: 10px; font-size: 12px; }
   .control:last-of-type { margin-bottom: 0; }
-
-  button { padding: 6px 12px; font-size: 12px; }
 
   .hint { display: none; }
 }
-
